@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sber UPOS Example</string>
+    <string name="error_connecting_upos">Ошибка при работе с пин-падом</string>
+    <string name="intent_value">Intent(\'ru.sberbank.uposnative.UposClientAidlInterface\')\nintent.component = ComponentName(\n pkg = \'ru.sberbank.upos_driver_test\',\n cls = \'ru.sberbank.uposnative.aidl.UposNativeClientAidlService\'\n )</string>
+</resources>
