@@ -12,6 +12,7 @@ import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
+import com.google.gson.Gson
 import ru.evotor.framework.core.IntegrationActivity
 import ru.evotor.framework.core.action.event.receipt.payment.combined.result.PaymentDelegatorCanceledAllEventResult
 import ru.mars_groupe.sber_upos_example.databinding.ActivityMainBinding
@@ -115,6 +116,10 @@ class MainActivity : IntegrationActivity() {
                 UposVspClientCallbackListener.Stub() {
                 override fun onTransactionResponse(transactionCode: Int, response: String) {
                     showMessage("onTransactionResponse(transactionCode = $transactionCode)")
+                    if(transactionCode == 0) {
+                        val responseUpos: UposResponse = Gson().fromJson(response, UposResponse::class.java)
+                        showMessage("sha1: ${responseUpos.hash}")
+                    }
                 }
 
                 override fun onTransactionArrayResponse(
