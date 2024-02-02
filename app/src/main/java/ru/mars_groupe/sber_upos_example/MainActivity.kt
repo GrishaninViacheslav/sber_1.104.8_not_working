@@ -27,8 +27,8 @@ class MainActivity : IntegrationActivity() {
     private var isServiceBound = false
     private var isServiceFound = false
 
-    private var uposCoreClientAidlInterface: UposClientAidlInterface? = null
-    private val uposCoreInterface: UposClientAidlInterface
+    private var uposCoreClientAidlInterface: UposVspClientAidlInterface? = null
+    private val uposCoreInterface: UposVspClientAidlInterface
         get() = uposCoreClientAidlInterface!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,11 +61,11 @@ class MainActivity : IntegrationActivity() {
     private fun bindUposService() {
         showMessage("bindUposService()")
         isAdapterRegistered = false
-        val intent = Intent( "ru.sberbank.uposnative.UposClientAidlInterface")
+        val intent = Intent( "ru.sberbank.uposnative.UposVspClientAidlInterface")
         try {
             intent.component = ComponentName(
-                "ru.sberbank.uposnative",
-                "ru.sberbank.uposnative.aidl.UposNativeClientAidlService"
+                "ru.sberbank.upos_driver_test",
+                "ru.sberbank.uposnative.aidl.UposVspClientAidlService"
             )
             isServiceFound = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
             showMessage("bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE): $isServiceFound")
@@ -81,7 +81,7 @@ class MainActivity : IntegrationActivity() {
     private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             showMessage("onServiceConnected(name = $name, service = $service)")
-            uposCoreClientAidlInterface = UposClientAidlInterface.Stub.asInterface(service)
+            uposCoreClientAidlInterface = UposVspClientAidlInterface.Stub.asInterface(service)
             isServiceBound = true
             showUposScreen()
         }
@@ -108,18 +108,45 @@ class MainActivity : IntegrationActivity() {
         showMessage("uposCoreInterface.doSomething(\"{\\\"OPERATION\\\":\\\"20\\\"}\")")
     }
 
-    private fun registerAdapter(uposInterface: UposClientAidlInterface) {
+    private fun registerAdapter(uposInterface: UposVspClientAidlInterface) {
         showMessage("registerAdapter(uposInterface: UposClientAidlInterface)")
         try {
             uposInterface.registerUposClientCallbackListener(object :
-                UposClientCallbackListener.Stub() {
+                UposVspClientCallbackListener.Stub() {
                 override fun onTransactionResponse(transactionCode: Int, response: String) {
                     showMessage("onTransactionResponse(transactionCode = $transactionCode)")
+                }
+
+                override fun onTransactionArrayResponse(
+                    transactionCode: Int,
+                    response: ByteArray?
+                ) {
+                    showMessage("onTransactionArrayResponse(transactionCode = $transactionCode)")
+                }
+
+                override fun onFullTransactionResponse(
+                    transactionCode: Int,
+                    response: ByteArray?,
+                    json: String?
+                ) {
+                    showMessage("onFullTransactionResponse(transactionCode = $transactionCode)")
+                }
+
+                override fun onMasterCallTransactionResponse(
+                    transactionCode: Int,
+                    response: ByteArray?,
+                    json: String?
+                ) {
+                    showMessage("onMasterCallTransactionResponse(transactionCode = $transactionCode)")
+                }
+
+                override fun onAdditionalAbstractResponse(type: Int, response: ByteArray?) {
+                    showMessage("onAdditionalAbstractResponse(type = $type)")
                 }
             })
             isAdapterRegistered = true
         } catch (e: RemoteException) {
-            showMessage("Error while register UposClientCallbackListener: $e")
+            showMessage("Error while register UposVspClientCallbackListener: $e")
         }
     }
 
