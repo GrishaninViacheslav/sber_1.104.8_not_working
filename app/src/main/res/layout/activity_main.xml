@@ -32,8 +32,20 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/lunchUpos"
+        android:id="@+id/init_upos"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:text="Внешний UPOS пин-пад" />
+        android:text="bindService" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/serviceMenu"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="startServiceMenu" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/doSomething"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="doSomething" />
 </LinearLayout>

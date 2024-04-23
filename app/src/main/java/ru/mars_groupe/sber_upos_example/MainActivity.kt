@@ -1,6 +1,5 @@
 package ru.mars_groupe.sber_upos_example
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -16,8 +15,6 @@ import com.google.gson.Gson
 import ru.evotor.framework.core.IntegrationActivity
 import ru.evotor.framework.core.action.event.receipt.payment.combined.result.PaymentDelegatorCanceledAllEventResult
 import ru.mars_groupe.sber_upos_example.databinding.ActivityMainBinding
-import ru.sberbank.uposnative.UposClientAidlInterface
-import ru.sberbank.uposnative.UposClientCallbackListener
 import ru.sberbank.uposnative.UposVspClientAidlInterface
 import ru.sberbank.uposnative.UposVspClientCallbackListener
 
@@ -40,12 +37,23 @@ class MainActivity : IntegrationActivity() {
     }
 
     private fun initViews() = with(binding) {
-        lunchUpos.setOnClickListener {
-            lunchUpos()
+        initUpos.setOnClickListener {
+            showMessage("initUpos button pressed")
+            initUpos()
+        }
+        serviceMenu.setOnClickListener {
+            showMessage("serviceMenu button pressed")
+            uposCoreInterface.startServiceMenu()
+            showMessage("uposCoreInterface.startServiceMenu()")
+        }
+        doSomething.setOnClickListener {
+            showMessage("doSomething button pressed")
+            uposCoreInterface.doSomething("{\"OPERATION\":\"20\"}")
+            showMessage("uposCoreInterface.doSomething(\"{\\\"OPERATION\\\":\\\"20\\\"}\")")
         }
     }
 
-    private fun lunchUpos() {
+    private fun initUpos() {
         if (!isServiceBound) {
             bindUposService()
             if (isServiceFound) {
@@ -54,7 +62,7 @@ class MainActivity : IntegrationActivity() {
                 showMessage(getString(R.string.error_connecting_upos))
             }
         } else {
-            showUposScreen()
+            tryRegisterAdapter()
         }
     }
 
@@ -84,7 +92,7 @@ class MainActivity : IntegrationActivity() {
             showMessage("onServiceConnected(name = $name, service = $service)")
             uposCoreClientAidlInterface = UposVspClientAidlInterface.Stub.asInterface(service)
             isServiceBound = true
-            showUposScreen()
+            tryRegisterAdapter()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -94,7 +102,8 @@ class MainActivity : IntegrationActivity() {
         }
     }
 
-    private fun showUposScreen() {
+    private fun tryRegisterAdapter() {
+        showMessage("tryRegisterAdapter()")
         val uposInterface = uposCoreClientAidlInterface
         if (uposInterface == null) {
             showMessage(getString(R.string.error_connecting_upos))
@@ -104,9 +113,6 @@ class MainActivity : IntegrationActivity() {
         if (!isAdapterRegistered) {
             registerAdapter(uposInterface)
         }
-
-        uposCoreInterface.doSomething("{\"OPERATION\":\"20\"}")
-        showMessage("uposCoreInterface.doSomething(\"{\\\"OPERATION\\\":\\\"20\\\"}\")")
     }
 
     private fun registerAdapter(uposInterface: UposVspClientAidlInterface) {
@@ -115,7 +121,7 @@ class MainActivity : IntegrationActivity() {
             uposInterface.registerUposClientCallbackListener(object :
                 UposVspClientCallbackListener.Stub() {
                 override fun onTransactionResponse(transactionCode: Int, response: String) {
-                    showMessage("onTransactionResponse(transactionCode = $transactionCode)")
+                    showMessage("onTransactionResponse(transactionCode = $transactionCode, response = $response)")
                     if(transactionCode == 0) {
                         val responseUpos: UposResponse = Gson().fromJson(response, UposResponse::class.java)
                         showMessage("sha1: ${responseUpos.hash}")
